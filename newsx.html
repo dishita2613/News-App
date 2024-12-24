@@ -1,0 +1,142 @@
+<a href="<!doctype html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>NewsX</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </head>
+    
+    <body>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">NewsX</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Sports</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Weather</a>
+                        </li>
+                    </ul>
+                    <form class="d-flex" role="search" id="searchForm">
+                        <input class="form-control me-2" type="search" placeholder="Search" id="queryInput"
+                            aria-label="Search">
+                        <button class="btn btn-outline-success" type="button" id="searchButton">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    
+        <div class="container">
+            <h1>Welcome to NewsX (<span id="resultCount"></span> Results)</h1>
+            <div class="row content"></div>
+            <div class="d-flex justify-content-around my-4">
+                <button class="btn btn-primary" id="prevPage"> &lt;Previous Page</button>
+                <button class="btn btn-primary" id="nextPage">Next Page &gt;</button>
+            </div>
+        </div>
+    
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+            </script>
+        <script>
+            let currentPage = 1;
+            let currentQuery = "sports";
+            const apiKey = "533abf24561c4bf5b6076b10416da8d2";  // Your actual API key
+    
+            const fetchNews = async (page, q) => {
+                console.log(`Fetching News for "${q}", Page number: ${page}`);
+                const url = `https://newsapi.org/v2/everything?q=${q}&from=2024-12-22&pageSize=20&page=${page}&language=en&sortBy=popularity&apiKey=794f49fbdcf84781ad26c814c049d9bf`;
+    
+                try {
+                    const response = await fetch(url);
+    
+                    // Log the status code for debugging
+                    console.log("Response Status:", response.status);
+    
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+                    }
+    
+                    const data = await response.json();
+                    console.log("Fetched data:", data);
+    
+                    // Check if there are any articles to display
+                    if (data.articles && data.articles.length > 0) {
+                        let str = '';
+                        for (let item of data.articles) {
+                            const imageUrl = item.urlToImage || 'https://via.placeholder.com/150';
+                            str += `<div class="card my-4 mx-2" style="width: 18rem;">
+                          <img height="184" src="${imageUrl}" class="card-img-top" alt="News Image">
+                          <div class="card-body">
+                            <h5 class="card-title">${item.title.slice(0,23)}</h5>
+                            <p class="card-text">${item.description.slice(0,123) || 'No description available.'}...</p>
+                            <a href="${item.url}" target="_blank" class="btn btn-primary">Read More</a>
+                          </div>
+                        </div>`;
+                        }
+                        document.querySelector(".content").innerHTML = str;
+                        document.getElementById("resultCount").innerText = data.totalResults || 0;
+    
+                        document.getElementById("prevPage").disabled = page === 1;
+                        document.getElementById("nextPage").disabled = page * 20 >= data.totalResults;
+                    } else {
+                        document.querySelector(".content").innerHTML = `<p>No articles found.</p>`;
+                    }
+                } catch (error) {
+                    console.error("Fetch error: ", error);
+                    document.querySelector(".content").innerHTML = `<p>Failed to load news: ${error.message}</p>`;
+                }
+            };
+    
+            document.getElementById("prevPage").addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchNews(currentPage, currentQuery);
+                }
+            });
+    
+            document.getElementById("nextPage").addEventListener("click", () => {
+                currentPage++;
+                fetchNews(currentPage, currentQuery);
+            });
+    
+            document.getElementById("searchButton").addEventListener("click", () => {
+                const query = document.getElementById("queryInput").value.trim();
+                if (query) {
+                    currentQuery = query;
+                    currentPage = 1;
+                    fetchNews(currentPage, currentQuery);
+                }
+            });
+    
+            // Prevent the form from submitting when the search button is clicked
+            document.getElementById("searchForm").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const query = document.getElementById("queryInput").value.trim();
+                if (query) {
+                    currentQuery = query;
+                    currentPage = 1;
+                    fetchNews(currentPage, currentQuery);
+                }
+            });
+    
+            // Initially fetch the news
+            fetchNews(currentPage, currentQuery);
+        </script>
+    </body>
+    
+    </html>"
+    </a>
